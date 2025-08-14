@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import DatePicker from "react-datepicker";         // ✅ Import DatePicker here
+import "react-datepicker/dist/react-datepicker.css"; // ✅ Import its CSS
 import "./InterviewScheduler.css";
 
 export default function InterviewScheduler() {
@@ -27,11 +29,12 @@ export default function InterviewScheduler() {
 
     setLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/interview/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, date, time, interview_type:type })
-      });
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/interview/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, date, time, interview_type: type })
+    });
+
 
       if (response.ok) {
         alert("✅ Interview scheduled and confirmation email sent!");
@@ -72,31 +75,34 @@ export default function InterviewScheduler() {
 
       <label>Select Date</label>
       <DatePicker
-        selected={selectedDate}
-        onChange={(date) => setSelectedDate(date)}
-        dateFormat="yyyy-MM-dd"
-        className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        minDate={new Date()} // disable past dates
-        placeholderText="Select a date"
+  selected={date ? new Date(date) : null}
+  onChange={(date) => setDate(date.toISOString().split('T')[0])} // yyyy-mm-dd
+  dateFormat="yyyy-MM-dd"
+  className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+  minDate={new Date()} // disable past dates
+  placeholderText="Select a date"
 />
+
+
 
     
 
       <label>Select Time Slot</label>
       <div className="grid grid-cols-3 gap-2">
-        {timeSlots.map((time) => (
-          <button
-            key={time}
-            type="button"
-            onClick={() => setSelectedTime(time)}
-            className={`p-2 rounded-md border font-medium transition-colors duration-200
-              ${selectedTime === time
-                ? "bg-indigo-600 text-white border-indigo-600"
-                : "bg-white text-gray-700 border-gray-300 hover:bg-indigo-50"}`}
-    >
-      {time}
-    </button>
-  ))}
+        {timeSlots.map((slot) => (
+  <button
+    key={slot}
+    type="button"
+    onClick={() => setTime(slot)}
+    className={`p-2 rounded-md border font-medium transition-colors duration-200
+      ${time === slot
+        ? "bg-indigo-600 text-white border-indigo-600"
+        : "bg-white text-gray-700 border-gray-300 hover:bg-indigo-50"}`}
+  >
+    {slot}
+  </button>
+))}
+
 </div>
 
 
