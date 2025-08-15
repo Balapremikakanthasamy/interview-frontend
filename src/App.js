@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { scheduleInterview } from "./services/api"; // ✅ Uses Render backend
 import Swal from "sweetalert2";
 
 function App() {
@@ -13,37 +14,28 @@ function App() {
 
   const payload = {
     candidate_name: candidateName,
-    interviewer_name: "Default Interviewer", // or from a dropdown
+    interviewer_name: "Default Interviewer",
     interview_type: interviewType,
     date: selectedDate,
     time: selectedTime,
     email: candidateEmail
   };
 
-  console.log("Sending payload:", payload); // debug log
+  console.log("Sending payload:", payload);
 
   try {
-    const res = await fetch("/api/interview/schedule", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const res = await scheduleInterview(payload); // ✅ Use API helper
 
-    const data = await res.json();
+    Swal.fire("Success", res.data.message, "success");
 
-    if (res.ok) {
-      Swal.fire("Success", data.message, "success");
-      setCandidateName("");
-      setCandidateEmail("");
-      setSelectedDate("");
-      setSelectedTime("");
-      setInterviewType("");
-    } else {
-      Swal.fire("Error", data.message || "Something went wrong", "error");
-    }
+    setCandidateName("");
+    setCandidateEmail("");
+    setSelectedDate("");
+    setSelectedTime("");
+    setInterviewType("");
   } catch (error) {
     console.error("Error scheduling interview:", error);
-    Swal.fire("Error", "Could not connect to the server", "error");
+    Swal.fire("Error", error.response?.data?.message || "Could not connect to the server", "error");
   }
 };
 
@@ -55,7 +47,10 @@ function App() {
           Schedule an Interview
         </h1>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
           {/* Candidate Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
